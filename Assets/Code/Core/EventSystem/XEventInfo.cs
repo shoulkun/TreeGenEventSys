@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Events;
+
 
 // public interface IEvent{}
 
@@ -26,5 +24,21 @@ public abstract class XEventInfo
     {
         m_EventId = cid;
         m_Enable = true;
+    }
+
+    private Queue<int> m_Path = new Queue<int>();
+    public Queue<int> path 
+    { 
+        get { return m_Path; } 
+    }
+
+    public void ClonePath(Queue<int> originalQueue)
+    {
+        // 将原始栈转换为数组
+        int[] array = originalQueue.ToArray();
+        // 倒序数组
+        //Array.Reverse(array);
+        // 使用数组创建一个新的栈
+        m_Path = new Queue<int>(array);
     }
 }

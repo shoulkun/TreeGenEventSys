@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-
 using UnityEngine.Events;
 
 public class XEventManager : XMonoSingleton<XEventManager>
@@ -27,22 +24,18 @@ public class XEventManager : XMonoSingleton<XEventManager>
     }
 
 
-    public void EventTrigger<T>(ushort eventId, T info)
+    public void TriggerEvent<T>(XEvent eventId, T info)
     {
-
-        if (m_EventGroupRoot.m_EventDicFlaten.ContainsKey(eventId))
-            (m_EventGroupRoot.m_EventDicFlaten[eventId] as XEventGame<T>).action?.Invoke(info);
+        m_EventGroupRoot.TriggerEvent<T>((int)eventId, info);
     }
 
-    public void EventTrigger(ushort eventId)
+    public void TriggerEvent(XEvent eventId)
     {
-        EventTrigger<XSignEvent>(eventId, EmptyCallBack);
+        TriggerEvent<XSignEvent>(eventId, EmptyCallBack);
     }
 
-    public void RemoveEventListener<T>(ushort eventId, UnityAction<T> action)
+    public void RemoveEventListener(XEvent eventId)
     {
-        if (m_EventGroupRoot.m_EventDicFlaten.ContainsKey(eventId))
-            (m_EventGroupRoot.m_EventDicFlaten[eventId] as XEventGame<T>).action -= action;
- 
+        m_EventGroupRoot.RemoveEventListener((int)eventId);
     }
 }

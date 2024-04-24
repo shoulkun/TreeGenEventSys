@@ -1,8 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Assertions.Must;
 using UnityEngine.Events;
 
 public class XEventResult<T>
@@ -48,6 +45,9 @@ public class XEventGroup : XEventInfo
             else
             {
                 t_Event = new XEventGame<T>(eventId, action);
+                t_Event.ClonePath(this.path);
+                t_Event.path.Enqueue(this.id);
+
                 m_EventDic.Add(eventId, t_Event);
                 m_EventDicFlaten.Add(eventId, t_Event);
 
@@ -69,8 +69,12 @@ public class XEventGroup : XEventInfo
             else
             {
                 t_EventGroupNext = new XEventGroup(t_GroupIdNext);
+                t_EventGroupNext.ClonePath(this.path);
+                t_EventGroupNext.path.Enqueue(this.id);
+
                 m_EventDic.Add(t_GroupIdNext, t_EventGroupNext);
                 m_EventDicFlaten.Add(t_GroupIdNext, t_EventGroupNext);
+
 
                 GLog.Log("XEventGroup::AddEventListener add group {0}", t_GroupIdNext);
             }
@@ -80,16 +84,47 @@ public class XEventGroup : XEventInfo
             #endregion
 
             #region 把下一层的所有EventInfo添加到本层的Flaten
-            foreach (var subGroupItem in t_EventGroupNext.m_EventDicFlaten)
+            foreach (var subInfo in t_EventGroupNext.m_EventDicFlaten)
             {
-                m_EventDicFlaten.TryAdd(subGroupItem.Key, subGroupItem.Value);
+                m_EventDicFlaten.TryAdd(subInfo.Key, subInfo.Value);
             }
             #endregion
         }
     }
 
+    public void TriggerEvent<T>(int eventId, T info)
+    {
+        if (m_EventDicFlaten.TryGetValue(eventId, out XEventInfo t_EventInfo))
+        {
+            XEventGame<T> t_Event = t_EventInfo as XEventGame<T>;
+            t_Event.action?.Invoke(info);
+        }
+    }
+
     public void RemoveEventListener(int eventId)
     {
+        if (m_EventDicFlaten.TryGetValue(eventId, out XEventInfo t_EventInfo))
+        {
+            while(t_EventInfo.path.Count > 1)
+            {
+                int t_GroupId = t_EventInfo.path.Dequeue();
+                XEventGroup t_EventGroup;
+                if(t_GroupId == this.id)
+                {
+                    t_EventGroup = this;
+                }
+                else
+                {
+                    t_EventGroup = m_EventDicFlaten[t_GroupId] as XEventGroup;
+                }
+                t_EventGroup.m_EventDicFlaten.Remove(eventId);
+            }
+            int last_GroupId = t_EventInfo.path.Dequeue();
+            XEventGroup last_EventGroup = m_EventDicFlaten[last_GroupId] as XEventGroup;
+            last_EventGroup.m_EventDicFlaten.Remove(eventId);
+            last_EventGroup.m_EventDic.Remove(eventId);
 
+            GLog.Log("XEventGroup::RemoveEventListener remove event {0}", eventId);
+        }
     }
 }
