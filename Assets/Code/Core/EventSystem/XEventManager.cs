@@ -27,26 +27,22 @@ public class XEventManager : XMonoSingleton<XEventManager>
     }
 
 
-    public void EventTrigger<T>(ushort eventId, T info, List<ulong> subGroupIds = null)
+    public void EventTrigger<T>(ushort eventId, T info)
     {
-        if(subGroupIds == null ||subGroupIds.Count == 0)
-        {
-            if (m_EventGroupRoot.m_EventDicFlaten.ContainsKey(eventId))
-                (m_EventGroupRoot.m_EventDicFlaten[eventId] as XEventGame<T>).action?.Invoke(info);
-        }
+
+        if (m_EventGroupRoot.m_EventDicFlaten.ContainsKey(eventId))
+            (m_EventGroupRoot.m_EventDicFlaten[eventId] as XEventGame<T>).action?.Invoke(info);
     }
 
-    public void EventTrigger(ushort eventId, List<ulong> subGroupIds = null)
+    public void EventTrigger(ushort eventId)
     {
-        EventTrigger<XSignEvent>(eventId, EmptyCallBack, subGroupIds);
+        EventTrigger<XSignEvent>(eventId, EmptyCallBack);
     }
 
-    public void RemoveEventListener<T>(ushort eventId, UnityAction<T> action, List<ulong> subGroupIds = null)
+    public void RemoveEventListener<T>(ushort eventId, UnityAction<T> action)
     {
-        if(subGroupIds == null ||subGroupIds.Count == 0)
-        {
-            if (m_EventGroupRoot.m_EventDicFlaten.ContainsKey(eventId))
-                (m_EventGroupRoot.m_EventDicFlaten[eventId] as XEventGame<T>).action -= action;
-        }
+        if (m_EventGroupRoot.m_EventDicFlaten.ContainsKey(eventId))
+            (m_EventGroupRoot.m_EventDicFlaten[eventId] as XEventGame<T>).action -= action;
+ 
     }
 }

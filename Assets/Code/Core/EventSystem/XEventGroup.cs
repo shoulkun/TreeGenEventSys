@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 using UnityEngine.Events;
 
 public class XEventResult<T>
@@ -26,18 +27,18 @@ public class XEventGroup : XEventInfo
 
     }
 
-    public XEventResult<T> AddEventListener<T>(int eventId, UnityAction<T> action, Span<int> subGroupIds)
+    public void AddEventListener<T>(int eventId, UnityAction<T> action, Span<int> subGroupIds)
     {
         if(action == null)
         {
             GLog.LogError("XEventGroup::AddEventListener action is null");
-            return null;
+            return;
         }
         
-        XEventResult<T> result = null;
-
         if(subGroupIds == null || subGroupIds.IsEmpty)
         {
+            #region 在最后一层添加Event
+
             XEventGame<T> t_Event;
             if (m_EventDicFlaten.TryGetValue(eventId, out XEventInfo t_EventInFlaten))
             {
@@ -49,17 +50,18 @@ public class XEventGroup : XEventInfo
                 t_Event = new XEventGame<T>(eventId, action);
                 m_EventDic.Add(eventId, t_Event);
                 m_EventDicFlaten.Add(eventId, t_Event);
+
+                GLog.Log("XEventGroup::AddEventListener add event {0}", eventId);
             }
 
-            result = new XEventResult<T>(t_Event, new List<XEventGroup>(){this});
+            #endregion
         }
         else
         {
-            int t_DeepGroup = subGroupIds.Length;
             int t_GroupIdNext = subGroupIds[0];
+            Span<int> t_subGroupIds = subGroupIds[1..subGroupIds.Length];
             XEventGroup t_EventGroupNext;
-            Span<int> t_subGroupIds = subGroupIds[1..t_DeepGroup];
-
+            
             if(m_EventDic.TryGetValue(t_GroupIdNext, out XEventInfo t_EventInEventGroup))
             {
                 t_EventGroupNext = t_EventInEventGroup as XEventGroup;
@@ -67,21 +69,27 @@ public class XEventGroup : XEventInfo
             else
             {
                 t_EventGroupNext = new XEventGroup(t_GroupIdNext);
+                m_EventDic.Add(t_GroupIdNext, t_EventGroupNext);
+                m_EventDicFlaten.Add(t_GroupIdNext, t_EventGroupNext);
 
+                GLog.Log("XEventGroup::AddEventListener add group {0}", t_GroupIdNext);
             }
-            m_EventDic.TryAdd(t_GroupIdNext, t_EventGroupNext);
 
-            result = t_EventGroupNext.AddEventListener<T>(eventId, action, t_subGroupIds);
-            result.m_groups.Add(this);
+            #region 递归到下一层，直到最后一层添加Event
+            t_EventGroupNext.AddEventListener<T>(eventId, action, t_subGroupIds);
+            #endregion
 
-            foreach (var item in result.m_groups)
+            #region 把下一层的所有EventInfo添加到本层的Flaten
+            foreach (var subGroupItem in t_EventGroupNext.m_EventDicFlaten)
             {
-                if(item != this)
-                    m_EventDicFlaten.TryAdd(item.id, item);
+                m_EventDicFlaten.TryAdd(subGroupItem.Key, subGroupItem.Value);
             }
-            m_EventDicFlaten.Add(eventId, result.m_gameEvent);
+            #endregion
         }
+    }
 
-        return result;
+    public void RemoveEventListener(int eventId)
+    {
+
     }
 }
