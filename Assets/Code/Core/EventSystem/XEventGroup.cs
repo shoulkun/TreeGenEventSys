@@ -94,10 +94,31 @@ public class XEventGroup : XEventInfo
 
     public void TriggerEvent<T>(int eventId, T info)
     {
+        if(!this.enable)
+            return;
+
         if (m_EventDicFlaten.TryGetValue(eventId, out XEventInfo t_EventInfo))
         {
             XEventGame<T> t_Event = t_EventInfo as XEventGame<T>;
+            if(!t_Event.enable)
+                return;
             t_Event.action?.Invoke(info);
+        }
+    }
+
+    public void SetGroupEventActive(bool enable)
+    {
+        foreach (var subInfo in m_EventDicFlaten)
+        {
+            subInfo.Value.enable = enable;
+        }
+    }
+
+    public void SetEventActive(int eventId, bool enable)
+    {
+        if (m_EventDicFlaten.TryGetValue(eventId, out XEventInfo t_EventInfo))
+        {
+            t_EventInfo.enable = enable;
         }
     }
 
