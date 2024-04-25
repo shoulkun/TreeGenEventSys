@@ -26,19 +26,20 @@ public abstract class XEventInfo
         m_Enable = true;
     }
 
-    private Queue<int> m_Path = new Queue<int>();
+    private Queue<int> m_Path;
     public Queue<int> path 
     { 
-        get { return m_Path; } 
+        get { m_Path ??= new Queue<int>();return m_Path; }
+        set { m_Path = value; } 
     }
 
-    public void ClonePath(Queue<int> originalQueue)
+    public static Queue<int> ClonePath(Queue<int> originalQueue)
     {
         // 将原始栈转换为数组
         int[] array = originalQueue.ToArray();
         // 倒序数组
         //Array.Reverse(array);
         // 使用数组创建一个新的栈
-        m_Path = new Queue<int>(array);
+        return new Queue<int>(array);
     }
 }

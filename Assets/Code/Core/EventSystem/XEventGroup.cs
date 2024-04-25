@@ -45,7 +45,7 @@ public class XEventGroup : XEventInfo
             else
             {
                 t_Event = new XEventGame<T>(eventId, action);
-                t_Event.ClonePath(this.path);
+                t_Event.path = XEventInfo.ClonePath(this.path);
                 t_Event.path.Enqueue(this.id);
 
                 m_EventDic.Add(eventId, t_Event);
@@ -69,7 +69,7 @@ public class XEventGroup : XEventInfo
             else
             {
                 t_EventGroupNext = new XEventGroup(t_GroupIdNext);
-                t_EventGroupNext.ClonePath(this.path);
+                t_EventGroupNext.path = XEventInfo.ClonePath(this.path);
                 t_EventGroupNext.path.Enqueue(this.id);
 
                 m_EventDic.Add(t_GroupIdNext, t_EventGroupNext);
