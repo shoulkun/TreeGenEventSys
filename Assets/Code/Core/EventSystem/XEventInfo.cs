@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 
 
-// public interface IEvent{}
-
 public abstract class XEventInfo
 {
     private int m_EventId;

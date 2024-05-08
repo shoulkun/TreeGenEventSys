@@ -1,15 +1,15 @@
-using UnityEngine.Events;
+using System;
 
 
 public class XEventGame<T> : XEventInfo
 {
-    private UnityAction<T> m_Action;
-    public UnityAction<T> action 
+    private Action<T> m_Action;
+    public Action<T> action 
     {
         get { return m_Action; }
         set { m_Action = value; }
     }
-    public XEventGame(int cid, UnityAction<T> action): base(cid)
+    public XEventGame(int cid, Action<T> action): base(cid)
     {
         m_Action = action;
     }

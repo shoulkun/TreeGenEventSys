@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine.Events;
+
 
 public class XEventResult<T>
 {
@@ -24,7 +24,13 @@ public class XEventGroup : XEventInfo
 
     }
 
-    public void AddEventListener<T>(int eventId, UnityAction<T> action, Span<int> subGroupIds)
+    /// <summary>
+    /// 添加 无参 事件监听器
+    /// </summary>
+    /// <param name="eventId">事件ID</param>
+    /// <param name="action">事件回调函数</param>
+    /// <param name="subGroupIds">事件所在分组ID路径</param>
+    public void AddEventListener<T>(int eventId, Action<T> action, Span<int> subGroupIds)
     {
         if(action == null)
         {
@@ -92,6 +98,12 @@ public class XEventGroup : XEventInfo
         }
     }
 
+    /// <summary>
+    /// 触发事件，发送参数类型
+    /// </summary>
+    /// <typeparam name="T">事件参数类型</typeparam>
+    /// <param name="eventId">事件ID</param>
+    /// <param name="info">参数</param>
     public void TriggerEvent<T>(int eventId, T info)
     {
         if(!this.enable)
@@ -122,6 +134,10 @@ public class XEventGroup : XEventInfo
         }
     }
 
+    /// <summary>
+    /// 移除事件
+    /// </summary>
+    /// <param name="eventId">事件ID</param>
     public void RemoveEventListener(int eventId)
     {
         if (m_EventDicFlaten.TryGetValue(eventId, out XEventInfo t_EventInfo))
